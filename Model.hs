@@ -1,25 +1,21 @@
 module Model where
 
 import Data.Word
-import Control.Applicative
 
-data OpCode = OpCode { baseCode :: !Word, extCode :: !Word }
+data OpCode = OpBase !Word16 | OpExt !Word16
   deriving (Eq, Show)
-
-basicCode :: Word -> OpCode
-basicCode c = OpCode c 0
 
 data OpInfo = 
   OpInfo {
     name :: !String
-  , cycles :: !Word
-  , failCycles :: !Word
+  , cycles :: !Int
+  , failCycles :: !Int
   , ocode :: !OpCode
   }
   deriving (Eq, Show)
 
 basicOps :: [OpInfo]
-basicOps = zipWith ($) ops (map basicCode [0x1 .. 0xf])
+basicOps = zipWith ($) ops (map OpBase [0x1 .. 0xf])
   where ops = [ OpInfo "SET" 1 0
               , OpInfo "ADD" 2 0
               , OpInfo "SUB" 2 0
@@ -38,24 +34,24 @@ basicOps = zipWith ($) ops (map basicCode [0x1 .. 0xf])
               ]
 
 extendedOps :: [OpInfo]
-extendedOps = [OpInfo "JSR" 2 0 (OpCode 0x0 0x1)]
+extendedOps = [OpInfo "JSR" 2 0 (OpExt 0x1)]
 
 data Register = A | B | C | X | Y | Z | I | J
   deriving (Eq, Ord, Enum, Bounded, Show)
 
 data Value = 
-    REG Register
-  | PtrREG Register
-  | PtrREG_NW Register
+    REG !Register
+  | PtrREG !Register
+  | PtrREG_NW !Word16 !Register
   | POP
   | PEEK
   | PUSH
   | SP
   | PC
   | O
-  | PtrNW
-  | NW
-  | Lit Word
+  | PtrNW !Word16
+  | NW !Word16
+  | Lit !Word16
   deriving (Eq, Show)
 
 data Instruction =
