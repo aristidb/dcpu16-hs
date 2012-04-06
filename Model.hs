@@ -1,42 +1,67 @@
 module Model where
 
 import Data.Word
+import Control.Applicative
 
-data BaseOp =
-  SET |
-  ADD |
-  SUB |
-  MUL |
-  DIV |
-  MOD |
-  SHL |
-  SHR |
-  AND |
-  BOR |
-  XOR |
-  IFE |
-  IFN |
-  IFG |
-  IFB
+data OpCode = OpCode { baseCode :: !Word, extCode :: !Word }
+  deriving (Eq, Show)
 
-baseCodes :: [(BaseOp, Word)]
-baseCodes = [
-    (SET, 0x1)
-  , (ADD, 0x2)
-  , (SUB, 0x3)
-  , (MUL, 0x4)
-  , (DIV, 0x5)
-  , (MOD, 0x6)
-  , (SHL, 0x7)
-  , (SHR, 0x8)
-  , (AND, 0x9)
-  , (BOR, 0xa)
-  , (XOR, 0xb)
-  , (IFE, 0xc)
-  , (IFN, 0xd)
-  , (IFG, 0xe)
-  , (IFB, 0xf)
-  ]
+basicCode :: Word -> OpCode
+basicCode c = OpCode c 0
 
-baseCycles :: BaseOp -> Word
-baseCycles x | x `elem` [SET, AND, BOR, XOR] = 1
+data OpInfo = 
+  OpInfo {
+    name :: !String
+  , cycles :: !Word
+  , failCycles :: !Word
+  , ocode :: !OpCode
+  }
+  deriving (Eq, Show)
+
+basicOps :: [OpInfo]
+basicOps = zipWith ($) ops (map basicCode [0x1 .. 0xf])
+  where ops = [ OpInfo "SET" 1 0
+              , OpInfo "ADD" 2 0
+              , OpInfo "SUB" 2 0
+              , OpInfo "MUL" 2 0
+              , OpInfo "DIV" 3 0
+              , OpInfo "MOD" 3 0
+              , OpInfo "SHL" 2 0
+              , OpInfo "SHR" 2 0
+              , OpInfo "AND" 1 0
+              , OpInfo "BOR" 1 0
+              , OpInfo "XOR" 1 0
+              , OpInfo "IFE" 2 1
+              , OpInfo "IFN" 2 1
+              , OpInfo "IFG" 2 1
+              , OpInfo "IFB" 2 1
+              ]
+
+extendedOps :: [OpInfo]
+extendedOps = [OpInfo "JSR" 2 0 (OpCode 0x0 0x1)]
+
+data Register = A | B | C | X | Y | Z | I | J
+  deriving (Eq, Ord, Enum, Bounded, Show)
+
+data Value = 
+    REG Register
+  | PtrREG Register
+  | PtrREG_NW Register
+  | POP
+  | PEEK
+  | PUSH
+  | SP
+  | PC
+  | O
+  | PtrNW
+  | NW
+  | Lit Word
+  deriving (Eq, Show)
+
+data Instruction =
+  Instruction {
+    icode :: OpCode
+  , iA :: Value
+  , iB :: Value
+  }
+  deriving (Eq, Show)
