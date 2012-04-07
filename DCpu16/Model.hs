@@ -1,4 +1,4 @@
-module Model where
+module DCpu16.Model where
 
 import Data.Word
 

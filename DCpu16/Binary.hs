@@ -1,7 +1,7 @@
-module Binary where
+module DCpu16.Binary where
 
-import Model
-import Memory
+import DCpu16.Model
+import DCpu16.Memory
 import Data.Word
 import Data.Bits
 import Data.Maybe

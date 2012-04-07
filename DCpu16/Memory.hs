@@ -1,5 +1,5 @@
 {-# LANGUAGE RankNTypes #-}
-module Memory (Memory, Tri(..), newMemory, readWord, readTri, writeWord, writeTri) where
+module DCpu16.Memory (Memory, Tri(..), newMemory, readWord, readTri, writeWord, writeTri) where
 
 import           Control.Applicative
 import           Data.IORef
