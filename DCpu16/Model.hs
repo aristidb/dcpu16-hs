@@ -56,7 +56,7 @@ data Value =
 
 data Instruction =
   Instruction {
-    icode :: OpCode
+    iCode :: OpCode
   , iA :: Value
   , iB :: Value
   }
