@@ -1,14 +1,12 @@
 {-# LANGUAGE RankNTypes #-}
-module DCpu16.Memory (Memory, Tri(..), newMemory, readWord, readTri, writeWord, writeTri) where
+module DCpu16.Memory
+  (Memory, Tri(..), newMemory, readWord, readTri, writeWord, writeTri, dumpMemory)
+where
 
-import           Control.Applicative
-import           Data.IORef
+import           Control.Monad
 import           Data.Word
 import qualified Data.Vector.Unboxed         as U
 import qualified Data.Vector.Unboxed.Mutable as UM
-import           Control.Monad
-import           Control.Monad.ST
-import qualified Data.ByteString             as B
 
 newtype Memory = Mem (UM.IOVector Word16)
 

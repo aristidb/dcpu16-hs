@@ -41,14 +41,14 @@ basicOps = zipWith ($) ops (map OpBase [0x1 .. 0xf])
 extendedOps :: [OpInfo]
 extendedOps = [OpInfo "JSR" Unary 2 0 (OpExt 0x1)]
 
-ops :: [OpInfo]
-ops = basicOps ++ extendedOps
+allOps :: [OpInfo]
+allOps = basicOps ++ extendedOps
 
 getOpByName :: String -> Maybe OpInfo
-getOpByName s = find (\OpInfo{name=s'} -> s==s') ops
+getOpByName s = find (\OpInfo{name=s'} -> s==s') allOps
 
 getOpByCode :: OpCode -> Maybe OpInfo
-getOpByCode cd = find (\OpInfo{ocode=cd'} -> cd==cd') ops
+getOpByCode cd = find (\OpInfo{ocode=cd'} -> cd==cd') allOps
 
 data Register = A | B | C | X | Y | Z | I | J
   deriving (Eq, Ord, Enum, Bounded, Show)

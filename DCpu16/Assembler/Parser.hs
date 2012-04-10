@@ -4,8 +4,6 @@ import           DCpu16.Assembler.Types
 import           DCpu16.Model
 
 import           Control.Applicative
-import           Control.Monad
-import           Data.Maybe
 import           Data.Word
 import           Numeric                (readHex)
 import           Text.Parsec            (Parsec, ParseError, SourceName, (<?>))
@@ -54,7 +52,7 @@ opParser = do sym <- word
                 Just oi -> return oi
 
 labelParser :: Parsec String () String
-labelParser = do P.char ':'
+labelParser = do _ <- P.char ':'
                  word
 
 word :: Parsec String () String
@@ -93,7 +91,7 @@ litValueParser = (P.choice . map P.try) [
                  <* filler1
 
 indirectLitValueParser :: Parsec String () Value
-indirectLitValueParser = do P.char '['; filler
+indirectLitValueParser = do _ <- P.char '['; filler
                             v <- (P.choice . map P.try $ [
                                        PtrREG_NW <$> numeric <*> 
                                          (P.char '+' >> filler >> registerParser)
@@ -106,7 +104,7 @@ indirectLitValueParser = do P.char '['; filler
                                      , PtrNW <$> numeric
                                      ])
                             filler
-                            P.char ']'; filler
+                            _ <- P.char ']'; filler
                             return v
 
 registerParser :: Parsec String () Register
