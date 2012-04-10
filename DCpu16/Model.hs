@@ -1,13 +1,18 @@
 module DCpu16.Model where
 
 import Data.Word
+import Data.List
 
 data OpCode = OpBase !Word16 | OpExt !Word16
+  deriving (Eq, Show)
+
+data Cardinality = Nullary | Unary | Binary
   deriving (Eq, Show)
 
 data OpInfo = 
   OpInfo {
     name :: !String
+  , cardinality :: !Cardinality
   , cycles :: !Int
   , failCycles :: !Int
   , ocode :: !OpCode
@@ -16,25 +21,34 @@ data OpInfo =
 
 basicOps :: [OpInfo]
 basicOps = zipWith ($) ops (map OpBase [0x1 .. 0xf])
-  where ops = [ OpInfo "SET" 1 0
-              , OpInfo "ADD" 2 0
-              , OpInfo "SUB" 2 0
-              , OpInfo "MUL" 2 0
-              , OpInfo "DIV" 3 0
-              , OpInfo "MOD" 3 0
-              , OpInfo "SHL" 2 0
-              , OpInfo "SHR" 2 0
-              , OpInfo "AND" 1 0
-              , OpInfo "BOR" 1 0
-              , OpInfo "XOR" 1 0
-              , OpInfo "IFE" 2 1
-              , OpInfo "IFN" 2 1
-              , OpInfo "IFG" 2 1
-              , OpInfo "IFB" 2 1
+  where ops = [ OpInfo "SET" Binary 1 0
+              , OpInfo "ADD" Binary 2 0
+              , OpInfo "SUB" Binary 2 0
+              , OpInfo "MUL" Binary 2 0
+              , OpInfo "DIV" Binary 3 0
+              , OpInfo "MOD" Binary 3 0
+              , OpInfo "SHL" Binary 2 0
+              , OpInfo "SHR" Binary 2 0
+              , OpInfo "AND" Binary 1 0
+              , OpInfo "BOR" Binary 1 0
+              , OpInfo "XOR" Binary 1 0
+              , OpInfo "IFE" Binary 2 1
+              , OpInfo "IFN" Binary 2 1
+              , OpInfo "IFG" Binary 2 1
+              , OpInfo "IFB" Binary 2 1
               ]
 
 extendedOps :: [OpInfo]
-extendedOps = [OpInfo "JSR" 2 0 (OpExt 0x1)]
+extendedOps = [OpInfo "JSR" Unary 2 0 (OpExt 0x1)]
+
+ops :: [OpInfo]
+ops = basicOps ++ extendedOps
+
+getOpByName :: String -> Maybe OpInfo
+getOpByName s = find (\OpInfo{name=s'} -> s==s') ops
+
+getOpByCode :: OpCode -> Maybe OpInfo
+getOpByCode cd = find (\OpInfo{ocode=cd'} -> cd==cd') ops
 
 data Register = A | B | C | X | Y | Z | I | J
   deriving (Eq, Ord, Enum, Bounded, Show)
@@ -53,6 +67,10 @@ data Value =
   | NW !Word16
   | Lit !Word16
   deriving (Eq, Show)
+
+numLit :: Word16 -> Value
+numLit w | w < 0x20  = Lit w
+         | otherwise = NW w
 
 data Instruction =
   Instruction {
