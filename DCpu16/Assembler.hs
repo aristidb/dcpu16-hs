@@ -15,9 +15,15 @@ type Label = String
 data Sign = Neg | Pos
   deriving (Eq, Ord, Enum, Bounded, Show)
 
+data Form = ShortForm | LongForm
+  deriving (Eq, Ord, Enum, Bounded, Show)
+
+data LabelRef = AbsRef Label |
+                RelRef Sign Label
+  deriving (Eq, Show)
+
 data AsmValue = LitValue Value |
-                AbsLabel Label |
-                RelLabel Sign Label
+                RefValue (Maybe Form) LabelRef
   deriving (Eq, Show)
 
 asmDummy :: AsmValue
@@ -97,7 +103,7 @@ numeric = (unreads =<< P.choice [ P.try (P.string "0x") >> unhex <$> P.many1 P.h
 
 valueParser :: Parsec String () AsmValue
 valueParser = fmap LitValue (indirectLitValueParser <|> litValueParser) <|>
-              relLabelRefParser <|> fmap AbsLabel absLabelRefParser
+              fmap (RefValue Nothing) (relLabelRefParser <|> absLabelRefParser)
 
 litValueParser :: Parsec String () Value
 litValueParser = (P.choice . map P.try) [
@@ -133,11 +139,11 @@ registerParser :: Parsec String () Register
 registerParser = (P.choice $ zipWith (\c i -> i <$ P.char c) "ABCXYZIJ" [A ..])
                  <?> "register (A/B/C, X/Y/Z or I/J)"
 
-relLabelRefParser :: Parsec String () AsmValue
+relLabelRefParser :: Parsec String () LabelRef
 relLabelRefParser = do sign <- P.choice [Neg <$ P.char '-', Pos <$ P.char '+']
                        filler
-                       ref <- absLabelRefParser
-                       return $ RelLabel sign ref
+                       ref <- word
+                       return $ RelRef sign ref
                        
-absLabelRefParser :: Parsec String () Label
-absLabelRefParser = word
+absLabelRefParser :: Parsec String () LabelRef
+absLabelRefParser = AbsRef <$> word
