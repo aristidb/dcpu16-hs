@@ -115,14 +115,16 @@ litValueParser = (P.choice . map P.try) [
 indirectLitValueParser :: Parsec String () Value
 indirectLitValueParser = do P.char '['; filler
                             v <- (P.choice . map P.try $ [
-                                PtrREG <$> registerParser
-                              , POP <$ P.string "SP++"
-                              , PEEK <$ P.string "SP"
-                              , PUSH <$ P.string "--SP"
-                              , PtrREG_NW <$> numeric <*> 
-                                  (P.char '+' >> filler >> registerParser)
-                              , PtrNW <$> numeric
-                              ])
+                                       PtrREG_NW <$> numeric <*> 
+                                         (P.char '+' >> filler >> registerParser)
+                                     , flip PtrREG_NW <$> (registerParser <* filler) <*> 
+                                         (P.char '+' >> filler >> numeric)
+                                     , PtrREG <$> registerParser
+                                     , POP <$ P.string "SP++"
+                                     , PEEK <$ P.string "SP"
+                                     , PUSH <$ P.string "--SP"
+                                     , PtrNW <$> numeric
+                                     ])
                             filler
                             P.char ']'; filler
                             return v
