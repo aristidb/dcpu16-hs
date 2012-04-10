@@ -73,6 +73,9 @@ numeric = (unreads =<< P.choice [ P.try (P.string "0x") >> unhex <$> P.many1 P.h
         unreads [(x,"")] = return x
         unreads _ = fail "Invalid number - PARSER BUG"
 
+literal :: String -> Parsec String () String
+literal s = P.string s <* filler1
+
 valueParser :: Parsec String () AsmValue
 valueParser = fmap LitValue (indirectLitValueParser <|> litValueParser) <|>
               fmap (RefValue Nothing) (relLabelRefParser <|> absLabelRefParser)
@@ -80,15 +83,15 @@ valueParser = fmap LitValue (indirectLitValueParser <|> litValueParser) <|>
 litValueParser :: Parsec String () Value
 litValueParser = (P.choice . map P.try) [
                    REG <$> registerParser
-                 , POP <$ P.string "POP"
-                 , PEEK <$ P.string "PEEK"
-                 , PUSH <$ P.string "PUSH"
-                 , SP <$ P.string "SP"
-                 , PC <$ P.string "PC"
-                 , O <$ P.string "O"
+                 , POP <$ literal "POP"
+                 , PEEK <$ literal "PEEK"
+                 , PUSH <$ literal "PUSH"
+                 , SP <$ literal "SP"
+                 , PC <$ literal "PC"
+                 , O <$ literal "O"
                  , numLit <$> numeric
                  ]
-                 <* filler1
+                 <* filler
 
 indirectLitValueParser :: Parsec String () Value
 indirectLitValueParser = do _ <- P.char '['; filler
@@ -98,9 +101,9 @@ indirectLitValueParser = do _ <- P.char '['; filler
                                      , flip PtrREG_NW <$> (registerParser <* filler) <*> 
                                          (P.char '+' >> filler >> numeric)
                                      , PtrREG <$> registerParser
-                                     , POP <$ P.string "SP++"
-                                     , PEEK <$ P.string "SP"
-                                     , PUSH <$ P.string "--SP"
+                                     , POP <$ literal "SP++"
+                                     , PEEK <$ literal "SP"
+                                     , PUSH <$ literal "--SP"
                                      , PtrNW <$> numeric
                                      ]
                             filler
@@ -108,7 +111,7 @@ indirectLitValueParser = do _ <- P.char '['; filler
                             return v
 
 registerParser :: Parsec String () Register
-registerParser = P.choice (zipWith (\c i -> i <$ P.char c) "ABCXYZIJ" [A ..])
+registerParser = P.choice (zipWith (\c i -> i <$ P.char c) "ABCXYZIJ" [A ..]) <* filler1
                  <?> "register (A/B/C, X/Y/Z or I/J)"
 
 relLabelRefParser :: Parsec String () LabelRef
