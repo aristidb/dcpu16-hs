@@ -26,7 +26,7 @@ readTri (Mem v) i = do let window = UM.slice (fromIntegral i) 3 v
                        return $ Tri x y z
 
 writeWord :: Memory -> Word16 -> Word16 -> IO ()
-writeWord (Mem v) i x = UM.write v (fromIntegral i) x
+writeWord (Mem v) i = UM.write v (fromIntegral i)
 
 writeTri :: Memory -> Word16 -> Tri -> IO ()
 writeTri (Mem v) i (Tri x y z) = do let window = UM.slice (fromIntegral i) 3 v

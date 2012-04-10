@@ -92,7 +92,7 @@ litValueParser = (P.choice . map P.try) [
 
 indirectLitValueParser :: Parsec String () Value
 indirectLitValueParser = do _ <- P.char '['; filler
-                            v <- (P.choice . map P.try $ [
+                            v <- P.choice . map P.try $ [
                                        PtrREG_NW <$> numeric <*> 
                                          (P.char '+' >> filler >> registerParser)
                                      , flip PtrREG_NW <$> (registerParser <* filler) <*> 
@@ -102,13 +102,13 @@ indirectLitValueParser = do _ <- P.char '['; filler
                                      , PEEK <$ P.string "SP"
                                      , PUSH <$ P.string "--SP"
                                      , PtrNW <$> numeric
-                                     ])
+                                     ]
                             filler
                             _ <- P.char ']'; filler
                             return v
 
 registerParser :: Parsec String () Register
-registerParser = (P.choice $ zipWith (\c i -> i <$ P.char c) "ABCXYZIJ" [A ..])
+registerParser = P.choice (zipWith (\c i -> i <$ P.char c) "ABCXYZIJ" [A ..])
                  <?> "register (A/B/C, X/Y/Z or I/J)"
 
 relLabelRefParser :: Parsec String () LabelRef
