@@ -20,7 +20,11 @@ data LabelRef = AbsRef Label |
   deriving (Eq, Show)
 
 data AsmValue = LitValue Value |
-                RefValue (Maybe Form) LabelRef
+                RefValue LabelRef
+  deriving (Eq, Show)
+
+data DetAsmValue = DetLitValue Value |
+                   DetRefValue Form LabelRef
   deriving (Eq, Show)
 
 asmDummy :: AsmValue
@@ -31,6 +35,14 @@ data AsmInstruction =
     aiOp :: OpInfo
   , aiA :: AsmValue 
   , aiB :: AsmValue
+  }
+  deriving (Eq, Show)
+
+data DetAsmInstruction =
+  DetAsmInstruction {
+    daiOp :: OpInfo
+  , daiA :: DetAsmValue
+  , daiB :: DetAsmValue
   }
   deriving (Eq, Show)
 
@@ -62,3 +74,10 @@ prepareAsmProgram xs = let prog@(AsmProgram bs lbls) = go xs
     go (Right instr : xs) = let (AsmProgram bs lbls) = go xs
                                 i :< is = S.viewl bs
                             in AsmProgram ((instr : i) <| is) lbls
+
+data DetAsmProgram
+  = DetAsmProgram {
+      dapAddressableBlocks :: Seq [DetAsmInstruction]
+    , dapLabels :: M.Map Label Int
+    }
+  deriving (Eq, Show)

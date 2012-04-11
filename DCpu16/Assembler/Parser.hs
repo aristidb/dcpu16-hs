@@ -78,7 +78,7 @@ literal s = P.string s <* filler1
 
 valueParser :: Parsec String () AsmValue
 valueParser = fmap LitValue (indirectLitValueParser <|> litValueParser) <|>
-              fmap (RefValue Nothing) (relLabelRefParser <|> absLabelRefParser)
+              fmap RefValue (relLabelRefParser <|> absLabelRefParser)
 
 litValueParser :: Parsec String () Value
 litValueParser = (P.choice . map P.try) [
