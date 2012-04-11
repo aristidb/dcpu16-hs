@@ -72,6 +72,12 @@ numLit :: Word16 -> Value
 numLit w | w < 0x20  = Lit w
          | otherwise = NW w
 
+valueSize :: Value -> Word16
+valueSize (PtrREG_NW {}) = 1
+valueSize (PtrNW {}) = 1
+valueSize (NW {}) = 1
+valueSize _ = 0
+
 data Instruction =
   Instruction {
     iCode :: OpCode

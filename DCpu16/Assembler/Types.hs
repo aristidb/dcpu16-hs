@@ -2,10 +2,11 @@ module DCpu16.Assembler.Types where
 
 import           DCpu16.Model
 
-import           Data.Sequence (Seq, (<|), (><), ViewL ((:<)))
-import qualified Data.Sequence as S
-import qualified Data.Map      as M
 import           Data.Monoid
+import           Data.Sequence (Seq, (<|), (><), ViewL ((:<)))
+import           Data.Word
+import qualified Data.Map      as M
+import qualified Data.Sequence as S
 
 type Label = String
 
@@ -26,6 +27,11 @@ data AsmValue = LitValue Value |
 data DetAsmValue = DetLitValue Value |
                    DetRefValue Form LabelRef
   deriving (Eq, Show)
+
+asmValueSize :: DetAsmValue -> Word16
+asmValueSize (DetLitValue v) = valueSize v
+asmValueSize (DetRefValue ShortForm _) = 0
+asmValueSize (DetRefValue LongForm _) = 1
 
 asmDummy :: AsmValue
 asmDummy = LitValue (REG A)
