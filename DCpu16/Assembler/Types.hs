@@ -46,11 +46,11 @@ data DetAsmInstruction =
   }
   deriving (Eq, Show)
 
-data AsmProgram 
-  = AsmProgram {
-      apAddressableBlocks :: Seq [AsmInstruction]
-    , apLabels :: M.Map Label Int
-    }
+data AsmProgram =
+  AsmProgram {
+    apAddressableBlocks :: Seq [AsmInstruction]
+  , apLabels :: M.Map Label Int
+  }
   deriving (Eq, Show)
 
 prependBlock :: [AsmInstruction] -> AsmProgram -> AsmProgram
@@ -75,9 +75,9 @@ prepareAsmProgram xs = let prog@(AsmProgram bs lbls) = go xs
                                 i :< is = S.viewl bs
                             in AsmProgram ((instr : i) <| is) lbls
 
-data DetAsmProgram
-  = DetAsmProgram {
-      dapAddressableBlocks :: Seq [DetAsmInstruction]
-    , dapLabels :: M.Map Label Int
-    }
+data DetAsmProgram =
+  DetAsmProgram {
+    dapAddressableBlocks :: Seq [DetAsmInstruction]
+  , dapLabels :: M.Map Label Int
+  }
   deriving (Eq, Show)
