@@ -52,6 +52,12 @@ data DetAsmInstruction =
   }
   deriving (Eq, Show)
 
+asmInstructionSize :: DetAsmInstruction -> Word16
+asmInstructionSize (DetAsmInstruction _ a b) = 1 + asmValueSize a + asmValueSize b
+
+asmBlockSize :: [DetAsmInstruction] -> Word16
+asmBlockSize = sum . map asmInstructionSize
+
 data AsmProgram =
   AsmProgram {
     apAddressableBlocks :: Seq [AsmInstruction]
